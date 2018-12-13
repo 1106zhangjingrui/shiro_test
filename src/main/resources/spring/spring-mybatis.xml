@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<!--3、配置使用mybatis操作数据库  -->
+	<!-- MyBatis SqlSessionFactoryBean 配置 -->
+	<!-- 注意：这里使用的是MP的MybatisSqlSessionFactoryBean，而不是Mybatis的，因为MP需要进行相应代理 -->
+	<bean id="sqlSessionFactory" class="com.baomidou.mybatisplus.spring.MybatisSqlSessionFactoryBean">
+		<!-- 配置数据源 -->
+		<property name="dataSource" ref="dataSource"/>
+		<!-- 配置Mybatis配置文件 -->
+		<property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+		<!-- 配置Mapper扫描路径（IDEA系列编辑器需要特别注意，因为IDEA的设置问题，src中的xml文件是不会被编译的，如果放在src中可能会报错，解决办法详见 常用问题-Invalid bound statement (not found) 错误如何解决?） -->
+		<property name="mapperLocations" value="classpath*:**/mybatis/xml/*.xml"/>
+		<!-- 配置别名包路径 -->
+		<property name="typeAliasesPackage" value="com.eclassedu.pojo"/>
+		<!-- 插件配置项  -->
+		<!--<property name="plugins">-->
+		<!--<array>-->
+		<!--&lt;!&ndash; 分页插件配置 &ndash;&gt;-->
+		<!--<bean id="paginationInterceptor" class="com.baomidou.mybatisplus.plugins.PaginationInterceptor">-->
+		<!--<property name="dialectType" value="mysql"/>-->
+		<!--</bean>-->
+		<!--</array>-->
+		<!--</property>-->
+		<property name="globalConfig">
+			<bean class="com.baomidou.mybatisplus.entity.GlobalConfiguration">
+				<!-- 主键策略配置 -->
+				<!-- 可选参数
+                    AUTO->`0`("数据库ID自增")
+                    INPUT->`1`(用户输入ID")
+                    ID_WORKER->`2`("全局唯一ID")
+                    UUID->`3`("全局唯一ID")
+                -->
+				<property name="idType" value="2"/>
+				<!-- 数据库类型配置 -->
+				<!-- 可选参数（默认mysql）
+                    MYSQL->`mysql`
+                    ORACLE->`oracle`
+                    DB2->`db2`
+                    H2->`h2`
+                    HSQL->`hsql`
+                    SQLITE->`sqlite`
+                    POSTGRE->`postgresql`
+                    SQLSERVER2005->`sqlserver2005`
+                    SQLSERVER->`sqlserver`
+                -->
+				<property name="dbType" value="mysql"/>
+				<property name="dbColumnUnderline" value="true" />
+				<property name="sqlInjector">
+					<bean class="com.baomidou.mybatisplus.mapper.AutoSqlInjector" />
+				</property>
+			</bean>
+		</property>
+	</bean>
+	<!-- 配置Mapper扫描路径 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<description>DAO接口所在包名，Spring会自动查找其下的类</description>
+		<property name="basePackage" value="com.eclassedu.dao*" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+
+	<bean id="mybatisSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory"></constructor-arg>
+		<!-- 这个执行器会批量执行更新语句, 还有SIMPLE 和 REUSE -->
+		<constructor-arg index="1" value="REUSE"></constructor-arg>
+		<!--
+        BATCH 更新操作返回的永远是一个固定值，设置为 SIMPLE 或 REUSE 才可以正常返回更新删除操作影响的条数
+        ExecutorType.SIMPLE 它会为每个语句的执行创建一个新的预处理语句，具体的实现类为 org.apache.ibatis.executor.BatchExecutor
+        ExecutorType.REUSE 它会复用预处理语句，具体的实现类为org.apache.ibatis.executor.BatchExecutor
+        ExecutorType.BATCH 这个执行器会批量执行更新语句，具体的实现类为org.apache.ibatis.executor.BatchExecutor-->
+	</bean>
+
+
+	<bean id="globalConfig" class="com.baomidou.mybatisplus.entity.GlobalConfiguration">
+		<property name="sqlInjector" ref="logicSqlInjector" />
+		<property name="logicDeleteValue" value="1" />
+		<property name="logicNotDeleteValue" value="0" />
+		<property name="idType" value="2" />
+	</bean>
+
+	<bean id="logicSqlInjector" class="com.baomidou.mybatisplus.mapper.LogicSqlInjector" />
+		
+</beans>

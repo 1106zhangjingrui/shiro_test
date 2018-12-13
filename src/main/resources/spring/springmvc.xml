@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:task="http://www.springframework.org/schema/task"
+	   xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+	<!-- 只扫描控制器，禁用默认规则 -->
+	<context:component-scan base-package="com.eclassedu" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/pages/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+	<!-- 扫描静态资源 -->
+	<mvc:default-servlet-handler/>
+	<task:scheduler id="taskScheduler" pool-size="100" />
+	<task:scheduled-tasks scheduler="taskScheduler">
+		<task:scheduled ref="chatWebSocketHandler" method="run" cron="0/2 * * * * ? "></task:scheduled>
+		<task:scheduled ref="ipAndAddressHandle" method="run" cron="0 0/10 * * * ? "></task:scheduled>
+	</task:scheduled-tasks>
+	<!-- 扫描动态资源 -->
+	<mvc:annotation-driven></mvc:annotation-driven>
+</beans>
